@@ -66,17 +66,14 @@ Suffixes defined by standard library:
 
 Template example:
 ```
-// Helper to inspect character packs at compile time
 template<char... Chars>
 struct BinaryParser;
 
-// Terminal base case
 template<>
 struct BinaryParser<> {
     static constexpr int value = 0;
 };
 
-// Recursive parsing pack
 template<char Head, char... Tail>
 struct BinaryParser<Head, Tail...> {
     static_assert(Head == '0' || Head == '1', "Error: Only '0' and '1' allowed!");
@@ -94,7 +91,7 @@ int main() {
     std::cout << parsed << std::endl;
 
     // auto faulty = 1021_b; 
-    // ^ Un-commenting this triggers a hard COMPILE-TIME error via static_assert!
+    // ^ Uncommenting this triggers a compile time error via static_assert
 }
 ```
 

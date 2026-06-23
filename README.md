@@ -1,4 +1,4 @@
-# CppPrimer
+# C++ Primer
 ## The Modern C++ Programming Language
 
 Latest (2023/2026) or unsupported features will be marked explicitly or omitted.
@@ -8,14 +8,36 @@ Literal is a fixed value written directly into the source code.
 C++ categorizes literals based on their data type:
 
 #### 1. Integer Literals  
-  Decimal (Base 10): written normally without prefix, binary (Base 2): 0b prefix, octal (Base 8): leading 0, hexadecimal (Base 16): 0x prefix.
+
+  Type prefixes:
+  | Prefix | Base |
+  | ------ | ---- |
+  | None     | base-10 |
+  | 0b or 0B | base-2  |
+  | 0        | base-8  |
+  | 0x or 0X | base 16 |
+  
   Type suffixes:
-  None: int, U or u: unsigned int, L or l: long int, LL or ll: long long int, UL or ul: unsigned long int, ULL or ull: unsigned long long int, Z or Z: size_t/ ptrdiff_t (C++23)
+  | Suffix | Type |
+  | ------ | ---- |
+  | None     | int         |
+  |U or u    | unsigned int|
+  |L or l    | long        |
+  |LL or ll  | long long   |
+  |UL or ul  | unsigned long      |
+  |ULL or ull| unsigned long long |
+  |Z or z    | size_t/ ptrdiff_t (C++23) |
 
 #### 2. Floating-Point Literals
+  
   Decimal or scientific notation (3.14159e-42)
   Type suffixes:
-  None: double, F or f: float, L or l: long double
+  | Suffix | Type |
+  | ------ | ---- |
+  | None   | double |
+  |F or f  | float  |
+  |L or l  | long double |
+  
   - One can use single quotes (`'`, ignored by compiler) as digit separators to improve the readability of long numbers.
   - For exact precision modeling without decimal rounding errors, one can express floating-point literals in hexadecimal. They begin with a 0x or 0X prefix, and the exponent is designated by p or P (mandatory), representing a power of 2. `double hex_lit = 0x1.4p3;`
 

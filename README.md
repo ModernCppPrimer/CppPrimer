@@ -9,6 +9,8 @@ C++ categorizes literals based on their data type:
 
 #### 1. Integer Literals  
 
+[integer_literal](https://en.cppreference.com/cpp/language/integer_literal)
+
   Type prefixes:
   | Prefix | Base |
   | ------ | ---- |
@@ -20,13 +22,13 @@ C++ categorizes literals based on their data type:
   Type suffixes:
   | Suffix | Type |
   | ------ | ---- |
-  | None     | int         |
-  |U or u    | unsigned int|
-  |L or l    | long        |
-  |LL or ll  | long long   |
-  |UL or ul  | unsigned long      |
-  |ULL or ull| unsigned long long |
-  |Z or z    | size_t/ ptrdiff_t (C++23) |
+  | None             | int         |
+  |U or u            | unsigned int|
+  |L or l            | long        |
+  |LL or ll          | long long   |
+  |(U or u)(L or l)  | unsigned long      |
+  |(U or u)(LL or ll)| unsigned long long |
+  | Z or z           | size_t/ ptrdiff_t (C++23) |
 
 #### 2. Floating-Point Literals
   
@@ -55,7 +57,7 @@ C++ categorizes literals based on their data type:
 [string_literal](https://en.cppreference.com/cpp/language/string_literal)
 
 String literals can be used to initialize character arrays. 
-`L"..."`: const wchar_t[], `u8"..."`: const char8_t[], `u"..."`: const char16_t[], `U"..."`: const char32_t[], \0 is appended.
+`L"..."` has type `const wchar_t[]`, `u8"..."` - `const char8_t[]`, `u"..."` - `const char16_t[]`, `U"..."`- `const char32_t[]`, \0 is appended.
 
 R prefix can be combined with encoding prefixes to bypass character escaping rules, syntax is R"delimiter(text)delimiter", delimiter is needed when the string contains '(' or ')'.
 `R"fn(y = f(x))fn"` // forms `"y = f(x)"`

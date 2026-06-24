@@ -28,7 +28,7 @@ C++ categorizes literals based on their data type:
   |`LL or ll`          | long long   |
   |`ul or uL or Ul or UL`    | unsigned long      |
   |`ull or uLL or Ull or ULL`| unsigned long long |
-  |`Z or z`           | size_t/ptrdiff_t (C++23) |
+  |`Z or z`                  | size_t/ptrdiff_t (C++23) |
 
 #### 2. Floating-Point Literals
 
@@ -38,7 +38,7 @@ C++ categorizes literals based on their data type:
   Type suffixes:
   | Suffix | Type |
   | ------ | ---- |
-  | None   | double |
+  | None     | double |
   |`F or f`  | float  |
   |`L or l`  | long double |
   
@@ -50,10 +50,10 @@ C++ categorizes literals based on their data type:
 
 | Prefix | Char type | String type (`s` suffix)| Encoding |
 | --- | --- | --- | --- |
-| `L'.'`  | wchar_t  | std::wstring   | platform dependent (UTF-16 for Win, UTF-32 for *nix) |
-| `u8'.'` | char8_t  | std::u8string  | UTF-8  |
-| `u'.'`  | char16_t | std::u16string | UTF-16 |
-| `U'.'`  | char32_t | std::u32string | UTF-32 |
+| `L'.'`  | `wchar_t`  | `std::wstring`   | platform dependent (UTF-16 for Win, UTF-32 for *nix) |
+| `u8'.'` | `char8_t`  | `std::u8string`  | UTF-8  |
+| `u'.'`  | `char16_t` | `std::u16string` | UTF-16 |
+| `U'.'`  | `char32_t` | `std::u32string` | UTF-32 |
 
 #### 4. String Literals
 [string_literal](https://en.cppreference.com/cpp/language/string_literal)
@@ -89,8 +89,8 @@ Suffixes defined by standard library:
 | Suffix | Type |
 | --- | --- |
 |`h, min, s, ms, us, ns` | `std::chrono::duration` |
-|`y` | `std::chrono::year |
-|`d` | `std::chrono::day` |
+|`y` | `std::chrono::year` |
+|`d` | `std::chrono::day`  |
 |`i, if, il` | `std::complex<double>, std::complex<float>, std::complex<long double>` |
 |`s` | `std::string`         |
 |`sv` | `std::string_view`   |
@@ -218,3 +218,98 @@ void checkStatus(Status s) {
     if (s == Active) { /* ... */ }
 }
 ```
+
+## Variadic templates
+
+Variadic templates are templates with one or more parameter packs as a template type parameters.
+Syntax `typename... Args` declares a pack that holds zero or more type parameters.
+The `sizeof...` operator returns a std::size_t corresponding to the number of elements in a parameter pack.
+
+### Parameter pack expansion
+
+Here is the list of context where parameter pack can be expanded.
+
+#### Function parameter list
+
+```cpp
+template<typename...T> 
+std::tuple<T...> create_tuple(T&&...t) {
+    return std::make_tuple<T...>(std::forward<T>(t)...);
+}
+const auto tuple = create_tuple(0, "word"s);
+```
+
+#### Initializer list
+
+```cpp
+template<std::same_as<int>...T>
+void aggregate(T...t) {
+    for (auto i: std::initializer_list<int>{t...}) {
+    }
+}
+```
+
+#### Base initializer list + mem-initializer list in constructor
+
+```cpp
+template<typename ...Base>
+    struct MyStruct :  Base... {
+        MyStruct();
+    };
+template<typename ...Base>
+MyStruct<Base...>::MyStruct() : Base()... {}
+```
+
+#### Template argument list
+
+`std::make_tuple<T...>`
+
+In the following case, the ellipsis plays double-duty, serving at once to expand one parameter pack and capture another:
+```cpp
+template<typename ...T> struct Outer {
+    template<T...V> struct Inner {
+      };
+    };
+```
+
+#### Using declaration
+
+```cpp
+template<typename ...Base>
+    struct Derived :  Base... {
+        using Base::fn...;
+    };
+```
+
+#### Lambda capture list
+
+```cpp
+void fn(auto...arg) {
+    auto with_copy = [arg...]{
+    };
+    with_copy();
+
+    auto with_reference = [&arg...]{
+    };
+    with_reference();
+}
+```
+
+#### Folds
+Special form of a pack expansion
+
+ Let ⊕ stand for any binary operator in the C++ grammar (.*, ->*, *, /, %, +, -, <<, >>, <=>, <, <=, >, >=, ==, !=, &, ^, |, &&, ||, =, +=, -=, *=, /=, %=, <<=, >>=, &=, ^=, |=, or the comma operator “,”)
+
+ | Fold type | Form | Equivalent expression|
+ |---|---|---|
+ |binary left fold | (e⊕...⊕pat) | (((e ⊕ p1) ⊕ p2) ⊕ ⋯) ⊕ pn |
+ |unary left fold  | (...⊕pat) | ((p1 ⊕ p2) ⊕ ⋯) ⊕ pn |
+ |binary right fold | (pat⊕...⊕e) | p1⊕(p2⊕(⋯⊕(pn⊕e))) |
+ |unary right fold | (pat⊕...) | p1⊕(p2⊕(⋯ ⊕ pn)) |
+
+
+### Capturing parameter packs
+
+#### Template parameter packs
+#### Function parameter packs
+Function parameter packs consist of values in the argument list of a function. There is a big restriction that a function parameter pack must either itself be a pack expansion `void aggregate(T...t)` or else contain the placeholder `auto`: `void aggregate(std::convertible_to<int> auto ...t).`.

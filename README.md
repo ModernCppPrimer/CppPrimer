@@ -28,7 +28,7 @@ C++ categorizes literals based on their data type:
   |`LL or ll`          | long long   |
   |`ul or uL or Ul or UL`    | unsigned long      |
   |`ull or uLL or Ull or ULL`| unsigned long long |
-  |`Z or z`           | size_t/ ptrdiff_t (C++23) |
+  |`Z or z`           | size_t/ptrdiff_t (C++23) |
 
 #### 2. Floating-Point Literals
 
@@ -124,4 +124,95 @@ int main() {
 }
 ```
 
+### Using keyword
+[using_keyword](https://en.cppreference.com/cpp/keyword/using)
 
+#### Using directive
+
+`using namespace std;`
+
+The using-directive pulls an entire namespace into the current scope, meaning you can reference its members without a prefix.
+
+#### Using declaration
+
+`using std::cout; // cout << "...";`
+
+The using-declaration pulls only a single, specific item from a namespace into the current scope.
+
+#### Type alias
+
+`using vector_of_strings = std::vector<std::string>;`
+
+Create alias for types, modern alternative for `typedef`.
+
+#### Template alias
+```
+template <typename T>
+using map_string = std::map<std::string, T>;
+map_string<int> phone_book; // equivalent to std::map<std::string, int> phone_book;
+```
+
+Create a partial template alias using a `using` keyword.
+
+#### Unhide base class overloads
+
+If a derived class defines a function with the same name as a function in the base class, it hides all overloaded variants of that function from the base class. One can use `using` to bring the base class overloads back into scope.
+
+```
+class Base {
+public:
+    void print(int x) {}
+    void print(double y) {}
+};
+
+class Derived : public Base {
+public:
+    using Base::print; // Brings both int and double overloads into scope
+    void print(std::string s) {} // Does not hide base overloads anymore
+};
+```
+
+#### Change access specifiers
+
+One can change the visibility of inherited members in a derived class using a `using` declaration.
+
+```
+class Base {
+protected:
+    int internalValue;
+};
+
+class Derived : private Base {
+public:
+    using Base::internalValue; // Promotes internalValue to public visibility
+};
+```
+
+#### Inheriting Constructors
+
+One can inherit all constructors of a base class without rewriting them manually.
+
+```
+class Base {
+public:
+    Base(int arg) {}
+    Base(double arg, int arg2) {}
+};
+
+class Derived : public Base {
+public:
+    using Base::Base; // Automatically inherits both constructors
+};
+```
+
+#### Using enum declarations
+
+This feature allows to pull the enumerators of a scoped enum directly into your local scope, cutting down on verbose prefixes (C++20).
+
+```
+enum class Status {Active, Inactive, Pending};
+void checkStatus(Status s) {
+    using enum Status; // Pulls Active, Inactive, Pending into local scope
+    if (s == Active) { /* ... */ }
+}
+```

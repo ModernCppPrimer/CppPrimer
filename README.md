@@ -285,12 +285,10 @@ template<typename ...Base>
 
 ```cpp
 void fn(auto...arg) {
-    auto with_copy = [arg...]{
-    };
+    auto with_copy = [arg...]{ /* ...auto :) */ };
     with_copy();
 
-    auto with_reference = [&arg...]{
-    };
+    auto with_reference = [&arg...]{ /* ...auto :) */ };
     with_reference();
 }
 ```
@@ -298,18 +296,140 @@ void fn(auto...arg) {
 #### Folds
 Special form of a pack expansion
 
- Let ⊕ stand for any binary operator in the C++ grammar (.*, ->*, *, /, %, +, -, <<, >>, <=>, <, <=, >, >=, ==, !=, &, ^, |, &&, ||, =, +=, -=, *=, /=, %=, <<=, >>=, &=, ^=, |=, or the comma operator “,”)
+ Let ⊕ stand for any binary operator in the C++ grammar (`.*`, `->*`, `*`, `/`, `%`, `+`, `-`, `<<`, `>>`, `<=>`, `<`, `<=`, `>`, `>=`, `==`, `!=`, `&`, `^`, `|`, `&&`, `||`, `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, `|=`, or the comma operator `,`)
 
  | Fold type | Form | Equivalent expression|
  |---|---|---|
  |binary left fold | (e⊕...⊕pat) | (((e ⊕ p1) ⊕ p2) ⊕ ⋯) ⊕ pn |
  |unary left fold  | (...⊕pat) | ((p1 ⊕ p2) ⊕ ⋯) ⊕ pn |
- |binary right fold | (pat⊕...⊕e) | p1⊕(p2⊕(⋯⊕(pn⊕e))) |
- |unary right fold | (pat⊕...) | p1⊕(p2⊕(⋯ ⊕ pn)) |
+ |binary right fold | (pat⊕...⊕e) | p1 ⊕ (p2 ⊕ ( ⋯ ⊕(pn ⊕ e))) |
+ |unary right fold | (pat⊕...) | p1 ⊕ (p2 ⊕ (⋯ ⊕ pn)) |
 
+Example:
+```cpp
+void print_all(const auto &...args) {
+  // binary left fold
+  (std::cout << ... << args);
+}
+```
 
 ### Capturing parameter packs
 
 #### Template parameter packs
+
+Template parameter packs consist of types, templates, and values within the angle brackets of a template definition. Any normal template parameter can be turned into a pack by prefixing the identifier with an ellipsis. For example:
+
+```cpp
+  template<typename ...T> struct struct_with_template_parameters_pack {};
+  template<int ...I> struct struct_with_integer_list {};
+  template<template<typename> typename ...Tmpls> struct struct_with_template_template_parameters_pack {};
+```
+
 #### Function parameter packs
-Function parameter packs consist of values in the argument list of a function. There is a big restriction that a function parameter pack must either itself be a pack expansion `void aggregate(T...t)` or else contain the placeholder `auto`: `void aggregate(std::convertible_to<int> auto ...t).`.
+Function parameter packs consist of values in the argument list of a function. There is a big restriction that a function parameter pack must either itself be a pack expansion `void aggregate(T...t)` or else contain the placeholder `auto`: `void aggregate(std::convertible_to<int> auto ...t)`.
+
+The `...` must always immediately precede the identifier of the captured parameter pack. This means the ellipsis falls in the middle of the pattern for arrays and function types, rather than at the end, but the pattern is still expanded as usual. For example:
+```cpp
+  template<std::size_t ...N>
+  void process_strings(const char (&...s)[N]) { /* ... */ }
+
+  template<typename ...T>
+  auto function_results(T (&...f)()) { return std::tuple(f()...); }
+```
+
+### Idioms
+
+#### Recurse over parameter list
+```cpp
+template<char...C>
+struct string_holder {
+  static constexpr std::size_t len = sizeof...(C);
+  static constexpr char value[] = { C..., '\0' };
+  constexpr operator const char *() const { return value; }
+  constexpr operator std::string() const { return { value, len }; }
+};
+
+template<size_t N, char...C>
+consteval auto index_string() {
+  if constexpr (N < 10)
+    return string_holder<N + '0', C...>{};
+  else
+    return index_string<N / 10, (N % 10) + '0', C...>();
+}
+
+constinit const char *fourty_two = index_string<42>(); // "42"
+```
+
+#### Comma fold
+
+```cpp
+template<typename T, typename ...E>
+void insert(T &t, E&&...e) {
+  (void(t.insert(std::forward<E>(e))), ...);
+}
+```
+```cpp
+
+template<template<typename...> typename Container, typename T, typename...Args>
+auto make_container(Args...args) 
+requires (std::same_as<T, Args> && ...)
+{
+    Container<T> c;
+    (c.push_back(std::forward<T>(args)), ...);
+    return c;
+}
+```
+
+#### Using lambda expressions to capture packs
+
+While parameter packs can be expanded in many contexts, one sometimes need to deconstruct a template type to extract the parameter pack. This can be awkward because there are fewer contexts in which to capture a pack. Worst-case scenario, this can be done by defining a helper type or function, but this leads to a lot of code and exposes the private internals of your implementation. One way to keep things more self-contained is with a lambda expression.
+
+Lambdas are particularly helpful in working with tuples. Combining a lambda with `std::apply` lets you capture a parameter pack corresponding to the contents of a tuple.
+```cpp
+template<typename T>
+void print(T&& tuple) {
+    std::apply(
+        [&]<typename ...T>(T...t) {
+            ((std::cout << t),...);
+        }, 
+        tuple
+    );
+}
+```
+
+#### Using lambda expressions to capture packs in requires clauses
+
+```cpp
+template<char ...C>
+requires (
+    sizeof...(C) > 0 && [](auto ...c) { return ((c == '0' || c == '1') && ...); } (C...)
+)
+constexpr long long operator""_binary()
+{
+  constexpr std::array digits{C...};
+  long long result = 0;
+  for (std::size_t i = 0; i < digits.size(); ++i)
+    result = result * 2 + int(digits[i] == '1');
+  return result;
+}
+
+std::cout << 101010_binary << std::endl; // Give me 42
+```
+
+#### Using decltype 
+
+```cpp
+template<typename T> using tuple_pointers =
+  decltype(
+      std::apply([](auto ...t) { return std::tuple(&t...); }, std::declval<T>())
+    );
+
+template<typename T> using reverse_tuple =
+  decltype(
+        []<size_t...I>(std::index_sequence<I...>) 
+        { 
+            return std::tuple<std::tuple_element_t<std::tuple_size_v<T> - 1 - I, T>...>{};
+        }
+        (std::make_index_sequence<std::tuple_size_v<T>>{})
+    );
+```

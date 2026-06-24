@@ -61,11 +61,12 @@ C++ categorizes literals based on their data type:
 String literals can be used to initialize character arrays. 
 `L"..."` has type `const wchar_t[]`, `u8"..."` - `const char8_t[]`, `u"..."` - `const char16_t[]`, `U"..."`- `const char32_t[]`, \0 is appended.
 
-R prefix can be combined with encoding prefixes to bypass character escaping rules, syntax is R"delimiter(text)delimiter", delimiter is needed when the string contains '(' or ')'.
+`R` prefix can be combined with encoding prefixes to bypass character escaping rules, syntax is R"delimiter(text)delimiter", delimiter is needed when the string contains '(' or ')'.
 `R"fn(y = f(x))fn"` // forms `"y = f(x)"`
 
 Type suffixes:
-s: std:string, sv: std::string_view
+`s`: `std:string`, `sv`: `std::string_view`
+TODO: What are the benefits of using `sv` suffix?
 
 Adjacent string literals are concatenated.
 `"Hello, " "world!"` // the 2 string literals form `"Hello, world!"`
@@ -82,19 +83,20 @@ Implemented as `operator""_suffix()`, parameters are for integer literal: `unsig
 Can be implemented as `ReturnType operator"" _suffix(const char*)` or `template<char...> ReturnType operator"" _suffix()` (only for integer and floating literals).
 
 Space between `"" _suffix` is obsolete in C++23.
+TODO: Why it was needed previously?
 
 Suffixes defined by standard library:
 | Suffix | Type |
 | --- | --- |
-|`h, min, s, ms, us, ns` | std::chrono::duration
-|`y` | std::chrono::year |
-|`d` | std::chrono::day |
-|`i, if, il` | std::complex |
-|`s` | std::string |
-|`sv` | std::string_view |
+|`h, min, s, ms, us, ns` | `std::chrono::duration` |
+|`y` | `std::chrono::year |
+|`d` | `std::chrono::day` |
+|`i, if, il` | `std::complex<double>, std::complex<float>, std::complex<long double>` |
+|`s` | `std::string`         |
+|`sv` | `std::string_view`   |
 
 Template example:
-```
+```cpp
 template<char... Chars>
 struct BinaryParser;
 
@@ -150,7 +152,7 @@ Create alias for types, modern alternative for `typedef`.
 template <typename T>
 using map_string = std::map<std::string, T>;
 map_string<int> phone_book; // equivalent to std::map<std::string, int> phone_book;
-```
+```cpp
 
 Create a partial template alias using a `using` keyword.
 
@@ -158,7 +160,7 @@ Create a partial template alias using a `using` keyword.
 
 If a derived class defines a function with the same name as a function in the base class, it hides all overloaded variants of that function from the base class. One can use `using` to bring the base class overloads back into scope.
 
-```
+```cpp
 class Base {
 public:
     void print(int x) {}
@@ -176,7 +178,7 @@ public:
 
 One can change the visibility of inherited members in a derived class using a `using` declaration.
 
-```
+```cpp
 class Base {
 protected:
     int internalValue;
@@ -192,7 +194,7 @@ public:
 
 One can inherit all constructors of a base class without rewriting them manually.
 
-```
+```cpp
 class Base {
 public:
     Base(int arg) {}
@@ -209,7 +211,7 @@ public:
 
 This feature allows to pull the enumerators of a scoped enum directly into your local scope, cutting down on verbose prefixes (C++20).
 
-```
+```cpp
 enum class Status {Active, Inactive, Pending};
 void checkStatus(Status s) {
     using enum Status; // Pulls Active, Inactive, Pending into local scope

@@ -78,7 +78,7 @@ If the two string literals are of the same kind, the concatenated string literal
 One can produce objects of user-defined type by defining a user-defined suffix for integer, floating, character and string literals.
 Examples: `12_km`, `0.5_Pa`, `'c'_X`, `"abd"_L` or `u"xyz"_M`
 
-Implemented as `operator""_suffix()`, parameters are for integer literal: unsigned long long, floating point: long double, character: char, wchar_t, char16_t, char32_t, string: `(const char*, std::size_t)`. 
+Implemented as `operator""_suffix()`, parameters are for integer literal: `unsigned long long`, floating point: `long double`, character: `char, wchar_t, char16_t, char32_t`, string: `(const char*, std::size_t)`. 
 Can be implemented as `ReturnType operator"" _suffix(const char*)` or `template<char...> ReturnType operator"" _suffix()` (only for integer and floating literals).
 
 Space between `"" _suffix` is obsolete in C++23.

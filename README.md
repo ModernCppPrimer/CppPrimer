@@ -15,30 +15,32 @@ C++ categorizes literals based on their data type:
   | Prefix | Base |
   | ------ | ---- |
   | None     | base-10 |
-  | 0b or 0B | base-2  |
-  | 0        | base-8  |
-  | 0x or 0X | base 16 |
+  | `0b or 0B` | base-2  |
+  | `0`        | base-8  |
+  | `0x or 0X` | base-16 |
   
   Type suffixes:
   | Suffix | Type |
   | ------ | ---- |
-  | None             | int         |
-  |U or u            | unsigned int|
-  |L or l            | long        |
-  |LL or ll          | long long   |
-  |(U or u)(L or l)  | unsigned long      |
-  |(U or u)(LL or ll)| unsigned long long |
-  | Z or z           | size_t/ ptrdiff_t (C++23) |
+  | None               | int         |
+  |`U or u`            | unsigned int|
+  |`L or l`            | long        |
+  |`LL or ll`          | long long   |
+  |`ul or uL or Ul or UL`    | unsigned long      |
+  |`ull or uLL or Ull or ULL`| unsigned long long |
+  |`Z or z`           | size_t/ ptrdiff_t (C++23) |
 
 #### 2. Floating-Point Literals
-  
+
+[floating_literal](https://en.cppreference.com/cpp/language/floating_literal)
+
   Decimal or scientific notation (3.14159e-42)
   Type suffixes:
   | Suffix | Type |
   | ------ | ---- |
   | None   | double |
-  |F or f  | float  |
-  |L or l  | long double |
+  |`F or f`  | float  |
+  |`L or l`  | long double |
   
   - One can use single quotes (`'`, ignored by compiler) as digit separators to improve the readability of long numbers.
   - For exact precision modeling without decimal rounding errors, one can express floating-point literals in hexadecimal. They begin with a 0x or 0X prefix, and the exponent is designated by p or P (mandatory), representing a power of 2. `double hex_lit = 0x1.4p3;`
@@ -76,17 +78,20 @@ If the two string literals are of the same kind, the concatenated string literal
 One can produce objects of user-defined type by defining a user-defined suffix for integer, floating, character and string literals.
 Examples: `12_km`, `0.5_Pa`, `'c'_X`, `"abd"_L` or `u"xyz"_M`
 
-Implemented as `operator""_suffix()`, parameters are for integer literal: unsigned long long, floating point: long double, character: char, wchar_t, char16_t, char32_t, string: `(const char*, std::size_t)`. Can be implemented as `ReturnType operator"" _suffix(const char*)` or `template<char...> ReturnType operator"" _suffix()` (only for integer and floating literals).
+Implemented as `operator""_suffix()`, parameters are for integer literal: unsigned long long, floating point: long double, character: char, wchar_t, char16_t, char32_t, string: `(const char*, std::size_t)`. 
+Can be implemented as `ReturnType operator"" _suffix(const char*)` or `template<char...> ReturnType operator"" _suffix()` (only for integer and floating literals).
 
 Space between `"" _suffix` is obsolete in C++23.
 
 Suffixes defined by standard library:
-`h, min, s, ms, us, ns`: std::chrono::duration
-`y`: std::chrono::year
-`d`: std::chrono::day
-`i, if, il`: std::complex
-`s`: std::string
-`sv`: std::string_view
+| Suffix | Type |
+| --- | --- |
+|`h, min, s, ms, us, ns` | std::chrono::duration
+|`y` | std::chrono::year |
+|`d` | std::chrono::day |
+|`i, if, il` | std::complex |
+|`s` | std::string |
+|`sv` | std::string_view |
 
 Template example:
 ```

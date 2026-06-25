@@ -28,7 +28,8 @@ C++ categorizes literals based on their data type:
   |`LL or ll`          | long long   |
   |`ul or uL or Ul or UL`    | unsigned long      |
   |`ull or uLL or Ull or ULL`| unsigned long long |
-  |`Z or z`                  | size_t/ptrdiff_t (C++23) |
+  |`uz or uZ or Uz or UZ`    | std::size_t |
+  |`z or Z` | signed std::size_t (std::ptrdiff_t) |
 
 #### 2. Floating-Point Literals
 

@@ -434,3 +434,91 @@ template<typename T> using reverse_tuple =
         (std::make_index_sequence<std::tuple_size_v<T>>{})
     );
 ```
+
+## Rule of three
+
+If a type requires custom d-tor, copy c-tor or assignment operator, it requires all three.
+
+Defining one of d-tor, copy c-ctor, assignment operator prevents compiler from defining default move c-ctor and move assignment operator (aid to avoid movement unexpected logic, falling back to copying).
+
+## Rule of five
+
+If class implements custom movement semantics logic it requires user implemented d-tor, copy c-ctor, assignement operator, move c-tor, move assignment operator.
+
+## Rule of zero
+
+Classes that have custom destructors, copy/move constructors or copy/move assignment operators should deal exclusively with ownership (which follows from the Single Responsibility Principle). Other classes should not have custom destructors, copy/move constructors or copy/move assignment operators.
+
+
+## Abbreviated Template Syntax
+
+One can use a concept directly in place of a type in a function parameter list.
+
+```cpp
+void process(std::signed_integral auto val) 
+```
+
+One can only omit the first type argument. If a concept requires more than one argument, one must provide the remaining arguments in parentheses after the concept name.
+
+```cpp
+void process(std::convertible_to<int> auto val);
+```
+
+## Function overloading using concepts
+
+When one overloads functions constrained by different concepts, the compiler uses a process called partial ordering of constraints to pick the most specific (most constrained) matching function.
+
+### Concepts can constrain variable initialization
+
+```cpp
+template<typename T>
+concept Number = std::is_arithmetic_v<T>;
+
+Number auto valid_var = 42;
+Number auto invalid_var = "Hello";
+```
+
+### Concepts can use template parameters
+
+```cpp
+template<forward_iterator Iterator, Arithmetic<iter_value_t<Iterator>> Value>
+Value accumulate(Iterator first, Iterator last, Value res)
+{
+  for (auto p = first; p!=last; ++p)
+    res += *p;
+  return res;
+}
+```
+
+#### Specify requrements as requires clause
+```cpp
+template<forward_iterator Iter>
+requires requires(Iter p, int i) { p[i]; p+i; } 
+void advance(Iter p, int n)
+{
+  p+=n;
+}
+```
+
+## Partial specialization of template variables
+```cpp
+template<typename T, typename U>
+constexpr bool is_same_v = false;
+
+template<typename T>
+constexpr bool is_same_v<T, T> = true;
+```
+
+The type of a partially specialized variable template does not have to match the type of the primary template.
+```cpp
+template<typename T>
+const char* data_info = "Unknown type";
+
+// Partial specialization changes the variable type to int
+template<typename T>
+int data_info<T*> = 42; 
+```
+
+There is no partial specialization of template functions. Use overloading with concepts or partial class specialization with static functions.
+
+

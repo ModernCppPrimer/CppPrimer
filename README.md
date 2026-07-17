@@ -353,9 +353,9 @@ struct string_holder {
 template<size_t N, char...C>
 consteval auto index_string() {
   if constexpr (N < 10)
-    return string_holder<N + '0', C...>{};
+    return string_holder< N + '0', C... >{};
   else
-    return index_string<N / 10, (N % 10) + '0', C...>();
+    return index_string< N / 10, (N % 10) + '0', C... >();
 }
 
 constinit const char *fourty_two = index_string<42>(); // "42"
@@ -423,16 +423,15 @@ std::cout << 101010_binary << std::endl; // Give me 42
 template<typename T> using tuple_pointers =
   decltype(
       std::apply([](auto ...t) { return std::tuple(&t...); }, std::declval<T>())
-    );
+  );
 
 template<typename T> using reverse_tuple =
   decltype(
-        []<size_t...I>(std::index_sequence<I...>) 
-        { 
+        []<size_t...I>(std::index_sequence<I...>) { 
             return std::tuple<std::tuple_element_t<std::tuple_size_v<T> - 1 - I, T>...>{};
         }
         (std::make_index_sequence<std::tuple_size_v<T>>{})
-    );
+  );
 ```
 
 ## Rule of three
@@ -482,8 +481,7 @@ Number auto invalid_var = "Hello";
 
 ```cpp
 template<forward_iterator Iterator, Arithmetic<iter_value_t<Iterator>> Value>
-Value accumulate(Iterator first, Iterator last, Value res)
-{
+Value accumulate(Iterator first, Iterator last, Value res) {
   for (auto p = first; p!=last; ++p)
     res += *p;
   return res;
@@ -493,10 +491,9 @@ Value accumulate(Iterator first, Iterator last, Value res)
 #### Specify requrements as requires clause
 ```cpp
 template<forward_iterator Iter>
-requires requires(Iter p, int i) { p[i]; p+i; } 
-void advance(Iter p, int n)
-{
-  p+=n;
+requires requires(Iter p, int i) { p[i]; p + i; } 
+void advance(Iter p, int n) {
+  p += n;
 }
 ```
 
@@ -521,4 +518,4 @@ int data_info<T*> = 42;
 
 There is no partial specialization of template functions. Use overloading with concepts or partial class specialization with static functions.
 
-
+## Constexpr

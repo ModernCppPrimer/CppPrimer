@@ -149,11 +149,11 @@ The using-declaration pulls only a single, specific item from a namespace into t
 Create alias for types, modern alternative for `typedef`.
 
 #### Template alias
-```
+```cpp
 template <typename T>
 using map_string = std::map<std::string, T>;
 map_string<int> phone_book; // equivalent to std::map<std::string, int> phone_book;
-```cpp
+```
 
 Create a partial template alias using a `using` keyword.
 
